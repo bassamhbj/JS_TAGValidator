@@ -1,18 +1,24 @@
 function TagValidator(){
-    const VALIDATOR_ATTR = "validator";
-    const VALIDATOR_GROUP = "group";
-
     var _fieldId = "";
+    var self = this;
 
-    var ValidatorKey = {
+    this.Tags = {
+        ID: "id",
+        VALIDATOR: "validator",
+        GROUP: "group",
+        TYPE: "type", // no incluir de momento
+        NEED: "need" // no incluir de momento
+    }
+
+    this.Rules = {
         REQUIRE: 'require',
-        INT: 'int',
+        NUMERIC: 'numeric',
         MAX_LENGTH: 'max-length', // param
         SAME: 'same', // group
         PASSWORD: 'password',
         PHONE: 'phone',
         EMAIL: 'email'
-    };
+    }
 
     this.validate = function (fieldId){
         _fieldId = fieldId;
@@ -20,107 +26,80 @@ function TagValidator(){
     }
 
     function doValidate(){
-        var validatorKeyStr = $("#" + _fieldId).data(VALIDATOR_ATTR);
+        var ruleStr = getFieldDataByIdTag(_fieldId, self.Tags.VALIDATOR);
         
-        if(validatorKeyStr.trim() != ""){
-            let validatorKey = validatorKeyStr.toLowerCase().trim().split(' ');
+        if(ruleStr.trim() != ""){
+            let ruleList = ruleStr.toLowerCase().trim().split(' ');
 
-            executeKeyArray(validatorKey);
+            executeRules(ruleList);
         }
     }
 
-    function executeKeyArray(validatorKey){
+    function executeRules(ruleList){
         var validator = new Validator(_fieldId);
         validator.clearError();
 
-        validatorKey.forEach(key => {
-            switch(key){
-                case ValidatorKey.REQUIRE:
-                    validator.require(getFieldValueById());
+        ruleList.forEach(rule => {
+            switch(rule){
+                case self.Rules.REQUIRE:
+                    validator.require(getFieldValueById(_fieldId));
                     break;
-                case ValidatorKey.INT:
-                    validator.int(getFieldValueById());
+                case self.Rules.NUMERIC:
+                    validator.numeric(getFieldValueById(_fieldId));
                     break;
-                case ValidatorKey.MAX_LENGTH:
-                    let length = getFieldValidatorParam(validatorKey);
-                    validator.maxLength(getFieldValueById(), length);
+                case self.Rules.MAX_LENGTH:
+                    let length = getFieldDataByIdTag(_fieldId, rule);
+                    validator.maxLength(getFieldValueById(_fieldId), length);
                     break;
-                case ValidatorKey.SAME:
-                    let value2 = getFieldValueByControl(findFieldSameGroup(validatorKey));
-                    validator.same(getFieldValueById(), value2);
+                case self.Rules.SAME:
+                    let controlList = findFieldSameGroup(rule);
+                    let value2 = getFieldValueByControl(controlList[0]);
+                    validator.same(getFieldValueById(_fieldId), value2);
                     break;
-                case ValidatorKey.PASSWORD:
-                    validator.password(getFieldValueById());
+                case self.Rules.PASSWORD:
+                    validator.password(getFieldValueById(_fieldId));
                     break;
-                case ValidatorKey.PHONE:
-                    validator.phone(getFieldValueById());
+                case self.Rules.PHONE:
+                    validator.phone(getFieldValueById(_fieldId));
                     break;
-                case ValidatorKey.EMAIL:
-                    validator.email(getFieldValueById());
+                case self.Rules.EMAIL:
+                    validator.email(getFieldValueById(_fieldId));
                     break;
             }
         });
     }
 
-    /*function executeKey(validatorKey){
-        var validator = new Validator(_fieldId);
-        validator.clearError();
-
-        switch(validatorKey){
-            case ValidatorKey.REQUIRE:
-                validator.require(getFieldValueById());
-                break;
-            case ValidatorKey.INT:
-                validator.int(getFieldValueById());
-                break;
-            case ValidatorKey.MAX_LENGTH:
-                let length = getFieldValidatorParam(validatorKey);
-                validator.maxLength(getFieldValueById(), length);
-                break;
-            case ValidatorKey.SAME:
-                let value2 = getFieldValueByControl(findFieldSameGroup(validatorKey));
-                validator.same(getFieldValueById(), value2);
-                break;
-            case ValidatorKey.PASSWORD:
-                validator.password(getFieldValueById());
-                break;
-            case ValidatorKey.PHONE:
-                validator.phone(getFieldValueById());
-                break;
-            case ValidatorKey.EMAIL:
-                validator.email(getFieldValueById());
-                break;
-        }
-    }*/
-
-    function getFieldValueById(){
-        return $("#" + _fieldId).val();
+    function getFieldValueById(fileId){
+        return $("#" + fileId).val();
     }
 
     function getFieldValueByControl(control){
         return control == null ? "" : $(control).val();
     }
 
-    // Change function name
-    function getFieldValidatorParam(key){
-        return $("#" + _fieldId).data(key);
+    function getFieldDataByIdTag(fileId, tag){
+        return $("#" + fileId).data(tag);
     }
 
-    /*function getFieldValueByValidatorKey(key){
-        var control = findFieldByValidatorKey(key);
-        return getFieldValueByControl(control);
-    }*/
+    function getFieldDataByControlTag(control, tag){
+        return control == null ? "" : $(control).data(tag);
+    }
 
-    function findFieldSameGroup(key){
-        var control = $("[data-" + VALIDATOR_ATTR + "], [data-" + VALIDATOR_GROUP +"]").filter(function() {
+    function findFieldSameGroup(){
+        var controlList = [];
+
+        $("[data-" + self.Tags.GROUP +"]").filter(function() {
             if(this.id != _fieldId){
-                if($(this).data(key + "-" + VALIDATOR_GROUP) == $("#" + _fieldId).data(key + "-" + VALIDATOR_GROUP)){
-                    return this;
+                let groupTarget = getFieldDataByControlTag(this, self.Tags.GROUP);
+                let groupCurrentField = getFieldDataByIdTag(_fieldId, self.Tags.GROUP);
+
+                if(groupTarget.trim() != "" && groupTarget.trim() == groupCurrentField.trim()){
+                    controlList.push(this);
                 }
             }
         });
 
-        return control;
+        return controlList;
     }
 }
 
@@ -128,7 +107,7 @@ function Validator(fieldId){
 
     const ERROR_ID_TEMPLATE = "_error";
 
-    this.clearError = () =>{ deleteError() };
+    this.clearError = () => { deleteError() };
 
     this.require = function(value){
         if(value.trim() == ""){
@@ -136,14 +115,22 @@ function Validator(fieldId){
         }
     };
 
-    this.int = function (value){
-        var regex = new RegExp(/[0-9]/);
+    this.numeric = function (value){
+        if(value.trim() == ""){
+            return;
+        }
+
+        var regex = new RegExp(/^[0-9]+$/);
         if(!regex.test(value)){
             showError("Input a numeric value");
         }
     };
 
     this.maxLength = function (value, length){
+        if(value.trim() == ""){
+            return;
+        }
+
         if(value.trim().length > length){
             showError("Input a value within " + length + " characters");
         }
@@ -156,6 +143,10 @@ function Validator(fieldId){
     };
 
     this.password = function(value){
+        if(value.trim() == ""){
+            return;
+        }
+
         var regex = new RegExp(/^[a-zA-Z0-9]{6,20}$/);
         if(!regex.test(value)){
             showError("Input an alphanumeric between 6 and 20 characters");
@@ -163,9 +154,15 @@ function Validator(fieldId){
     };
 
     this.phone = function(value){
+        if(value.trim() == ""){
+            return;
+        }
     };
 
     this.email = function(value){
+        if(value.trim() == ""){
+            return;
+        }
     };
 
     function deleteError(){
@@ -179,5 +176,23 @@ function Validator(fieldId){
         span.innerText = errorMsg;
 
         $("#" + fieldId).after(span);
+    }
+}
+
+function ValidatorSettings(){
+    this.setSettings = function(settings){
+        settings.forEach(item => {
+            var controlId = ""
+
+            Object.keys(item).forEach(key => {
+                if(key == "id"){
+                    controlId = item[key];
+                }else if(controlId.trim() != ""){
+                    $("#" + controlId).attr("data-" + key.replace('_', '-'), item[key]);
+                }
+            });
+
+            controlId = "";
+        });
     }
 }

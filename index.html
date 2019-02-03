@@ -16,36 +16,59 @@
             <h2>TAG Validator JS</h2>
             <div class="form-group">
                 <span>Name:</span>
-                <input type="text" id="name" class="form-control" 
-                    data-validator="require max-length" 
-                    data-max-length="20">
+                <input type="text" id="name" class="form-control">
             </div>
             <div class="form-group">
                 <span>Nickname:</span>
-                <input type="text" id="nickname" class="form-control" 
-                    data-validator="int">
+                <input type="text" id="nickname" class="form-control">
             </div>
             <div class="form-group">
                 <span>Password:</span>
-                <input type="password" id="password" class="form-control" 
-                    data-validator="password" 
-                    data-same-group="pass">
+                <input type="password" id="password" class="form-control">
             </div>
             <div class="form-group">
                 <span>Confirm Password:</span>
-                <input type="password" id="repassword" class="form-control" 
-                    data-validator="same" 
-                    data-same-group="pass">
+                <input type="password" id="repassword" class="form-control">
             </div>
         </div>
 
         <script type="text/javascript">
             $(function(){
+                setValidatorSettings();
+
                 $("input[data-validator]").blur(function(){
                     var tagValidator = new TagValidator();
                     tagValidator.validate(this.id);
                 });
             });
+
+            function setValidatorSettings(){
+                var tag = new TagValidator();
+
+                var settings = [{
+                        [tag.Tags.ID]: "name",
+                        [tag.Tags.VALIDATOR]: "require max-length",
+                        [tag.Rules.MAX_LENGTH]: "20"
+                    }, {
+                        [tag.Tags.ID]: "nickname",
+                        [tag.Tags.VALIDATOR]: "numeric"
+                    }, {
+                        [tag.Tags.ID]: "password",
+                        [tag.Tags.VALIDATOR]: "require password",
+                        [tag.Tags.GROUP]: "pass"
+                    }, {
+                        [tag.Tags.ID]: "password2",
+                        [tag.Tags.VALIDATOR]: "require password",
+                        [tag.Tags.GROUP]: "pass"
+                    }, {
+                        [tag.Tags.ID]: "repassword",
+                        [tag.Tags.VALIDATOR]: "same",
+                        [tag.Tags.GROUP]: "pass"
+                    }];
+
+                var base = new ValidatorSettings();
+                base.setSettings(settings);
+            }
         </script>
     </body>
 </html>

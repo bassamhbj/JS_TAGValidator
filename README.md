@@ -1,75 +1,74 @@
 # TAG Validator
 
-
-TAG Validator is an HTML form validator script. Using HTML5 [data] attributes allows you to set validation rules for each field in the form in an easy way.
-
-#### TAG Example
-
+TAG Validator is a JavaScript script that makes easy the form validation using a clear sintax.
+It works using HTML5's **data attributes** for set the Validation Rules.
 ```html
-<input type="text" id="name" class="form-control" 
+<input type="text" id="name"
                     data-validator="require max-length" 
                     data-max-length="20">
 ```
 
-### How to validate a field
-For validate a field, just need to call the **validate** function from TAG Validator and pass the field **ID** as parameter.
+## How to set up TAG Validator
+First you need to include the script in the page.
+`<script src="tagvalidator.js"/>`
 
-```javascript
-<script type="text/javascript">
-	$(function(){
-		$("input[data-validator]").blur(function(){
-			var tagValidator = new TagValidator();
-			tagValidator.validate(this.id);
-		});
-	});
-</script>
-```
+For set the Validation Rules there are two ways:
+- Writting the Rules directly in the HTML control
+- With JS Object 
 
-This script wil validate every **input** field that contains the **data-validator** attribute after lose the focus.
+### Writting the Rules (directly way)
+The format is as follows: **data-[TAG Name]="[rules]"**
+`data-validator="require numeric"`
 
-### data-validator
-This attribute indicates the validation rules for that field. It accepts any of the supported rules.
-
-```
-data-validator="require max-length int phone" 
-```
-
-### data-{parameter}
-If any validation rule needs a parameter, like maximum length, it is indicated for the word data + the validation rule.
-
-`data-{validation rule}="{parameter}" `
-
-```
-data-max-length="20" 
-```
-
-### Validation Group
-Some rules will need to be agrouped to execute the rule. For example, the Same rule will need to compare two fields.
-The way to indicate **validation group** is:
-
-`data-{validation rule}-group="{group name}"`
-
+And just need to be added to the HTML control:
 ```html
-<input type="password" id="password"
-                    data-validator="password" 
-                    data-same-group="pass">
-
-<input type="password" id="repassword" class="form-control" 
-                    data-validator="same" 
-                    data-same-group="pass">
+<input type="text" id="name" 
+                    data-validator="require numeric">
 ```
 
-**repassword** field has the rule **same** and the **pass group** is the target group to be validated.
+### Using JS Object
+JavaScript Objects allows you configure all the HTML controls having all the information for validation in one places. Making future changes and debugging easy.
+```javascript
+var settings = [
+	{
+		tag_name: "rules"
+	}
+]
+```
+Example:
+```javascript
+var settings = [
+	{
+		id: "name",
+		validator: "require"
+	}, {
+		id: "age",
+		validator: "require numeric"
+	}
+]
+```
+Settings is an array of objects. For each control, one object. In each object, the **ID** property is mandatory, the others are optional.
+How to initialize the settings:
+```javascript
+var base = new ValidatorSettings();
+base.setSettings(settings);
+```
+This functions binds the settings in every HTML control.
 
-### Supported Validation Rules
-- Require: require
-- Max length: max-length (need parameter)
-- Int: int
+## TAGS
+Tags are attributes for each HTML control that contains the information for validate it.
+Available TAGS:
+- ID
+- VALIDATOR
+- GROUP
 
-| Rule Name  | Rule Keyword | Parameter |
-| ------------- | ------------- | ------------- |
-| Require  | require  | |
-| Numeric  | int  | |
-| Max Length | max-length | length(numeric) |
-| Same | same | Same Group field |
-| Password | password | |
+## RULES
+The Rules indicates how the HTML has to be validated.
+Available RULES:
+- REQUIRE
+- NUMERIC
+- MAX_LENGTH
+- SAME
+- PASSWORD
+- PHONE
+- EMAIL
