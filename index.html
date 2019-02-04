@@ -46,24 +46,24 @@
                 var tag = new TagValidator();
 
                 var settings = [{
-                        [tag.Tags.ID]: "name",
-                        [tag.Tags.VALIDATOR]: "require max-length",
-                        [tag.Rules.MAX_LENGTH]: "20"
+                        id: "name",
+                        validator: "require max-length",
+                        max_length: "20"
                     }, {
-                        [tag.Tags.ID]: "nickname",
-                        [tag.Tags.VALIDATOR]: "numeric"
+                        id: "nickname",
+                        validator: "numeric"
                     }, {
-                        [tag.Tags.ID]: "password",
-                        [tag.Tags.VALIDATOR]: "require password",
-                        [tag.Tags.GROUP]: "pass"
+                        id: "password",
+                        validator: "require password",
+                        group: "pass"
                     }, {
-                        [tag.Tags.ID]: "password2",
-                        [tag.Tags.VALIDATOR]: "require password",
-                        [tag.Tags.GROUP]: "pass"
+                        id: "password2",
+                        validator: "require password",
+                        group: "pass"
                     }, {
-                        [tag.Tags.ID]: "repassword",
-                        [tag.Tags.VALIDATOR]: "same",
-                        [tag.Tags.GROUP]: "pass"
+                        id: "repassword",
+                        validator: "same",
+                        group: "pass"
                     }];
 
                 var base = new ValidatorSettings();

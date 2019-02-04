@@ -1,8 +1,7 @@
 function TagValidator(){
     var _fieldId = "";
-    var self = this;
 
-    this.Tags = {
+    var Tags = {
         ID: "id",
         VALIDATOR: "validator",
         GROUP: "group",
@@ -10,7 +9,7 @@ function TagValidator(){
         NEED: "need" // no incluir de momento
     }
 
-    this.Rules = {
+    var Rules = {
         REQUIRE: 'require',
         NUMERIC: 'numeric',
         MAX_LENGTH: 'max-length', // param
@@ -26,7 +25,7 @@ function TagValidator(){
     }
 
     function doValidate(){
-        var ruleStr = getFieldDataByIdTag(_fieldId, self.Tags.VALIDATOR);
+        var ruleStr = getFieldDataByIdTag(_fieldId, Tags.VALIDATOR);
         
         if(ruleStr.trim() != ""){
             let ruleList = ruleStr.toLowerCase().trim().split(' ');
@@ -39,30 +38,30 @@ function TagValidator(){
         var validator = new Validator(_fieldId);
         validator.clearError();
 
-        ruleList.forEach(rule => {
+        ruleList.forEach(function(rule) {
             switch(rule){
-                case self.Rules.REQUIRE:
+                case Rules.REQUIRE:
                     validator.require(getFieldValueById(_fieldId));
                     break;
-                case self.Rules.NUMERIC:
+                case Rules.NUMERIC:
                     validator.numeric(getFieldValueById(_fieldId));
                     break;
-                case self.Rules.MAX_LENGTH:
+                case Rules.MAX_LENGTH:
                     let length = getFieldDataByIdTag(_fieldId, rule);
                     validator.maxLength(getFieldValueById(_fieldId), length);
                     break;
-                case self.Rules.SAME:
+                case Rules.SAME:
                     let controlList = findFieldSameGroup(rule);
                     let value2 = getFieldValueByControl(controlList[0]);
                     validator.same(getFieldValueById(_fieldId), value2);
                     break;
-                case self.Rules.PASSWORD:
+                case Rules.PASSWORD:
                     validator.password(getFieldValueById(_fieldId));
                     break;
-                case self.Rules.PHONE:
+                case Rules.PHONE:
                     validator.phone(getFieldValueById(_fieldId));
                     break;
-                case self.Rules.EMAIL:
+                case Rules.EMAIL:
                     validator.email(getFieldValueById(_fieldId));
                     break;
             }
@@ -88,10 +87,10 @@ function TagValidator(){
     function findFieldSameGroup(){
         var controlList = [];
 
-        $("[data-" + self.Tags.GROUP +"]").filter(function() {
+        $("[data-" + Tags.GROUP +"]").filter(function() {
             if(this.id != _fieldId){
-                let groupTarget = getFieldDataByControlTag(this, self.Tags.GROUP);
-                let groupCurrentField = getFieldDataByIdTag(_fieldId, self.Tags.GROUP);
+                let groupTarget = getFieldDataByControlTag(this, Tags.GROUP);
+                let groupCurrentField = getFieldDataByIdTag(_fieldId, Tags.GROUP);
 
                 if(groupTarget.trim() != "" && groupTarget.trim() == groupCurrentField.trim()){
                     controlList.push(this);
@@ -107,7 +106,7 @@ function Validator(fieldId){
 
     const ERROR_ID_TEMPLATE = "_error";
 
-    this.clearError = () => { deleteError() };
+    this.clearError = function () { deleteError() };
 
     this.require = function(value){
         if(value.trim() == ""){
@@ -181,13 +180,13 @@ function Validator(fieldId){
 
 function ValidatorSettings(){
     this.setSettings = function(settings){
-        settings.forEach(item => {
+        settings.forEach(function(item) {
             var controlId = ""
 
-            Object.keys(item).forEach(key => {
+            Object.keys(item).forEach(function(key) {
                 if(key == "id"){
                     controlId = item[key];
-                }else if(controlId.trim() != ""){
+                }else if(controlId.trim() != "" && item.hasOwnProperty(key)){
                     $("#" + controlId).attr("data-" + key.replace('_', '-'), item[key]);
                 }
             });
